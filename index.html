@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop Online Help</title>
+  <style>
+    :root {
+      --bg: #fdf2f7;
+      --surface: #ffffff;
+      --text: #2a1520;
+      --muted: #7a5f6c;
+      --border: #f5dbe7;
+      --accent-1: #db2777;
+      --accent-2: #f472b6;
+      --bot-bubble: #fcedf4;
+      --user-text: #ffffff;
+      --chip-bg: #fce7f3;
+      --chip-text: #be185d;
+      --shadow: 0 20px 50px rgba(190, 24, 93, 0.14);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      transition: background 0.35s ease, color 0.35s ease;
+    }
+
+    .chat {
+      width: 100%;
+      max-width: 720px;
+      height: min(820px, calc(100vh - 32px));
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: background 0.35s ease, border-color 0.35s ease;
+    }
+
+    header {
+      padding: 18px 22px;
+      background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.22);
+      display: grid; place-items: center;
+      font-weight: 700;
+    }
+    header h1 { font-size: 1.05rem; font-weight: 600; }
+    header p { font-size: 0.8rem; opacity: 0.85; }
+
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .msg {
+      max-width: 82%;
+      padding: 12px 16px;
+      border-radius: 16px;
+      line-height: 1.5;
+      font-size: 0.95rem;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      animation: pop 0.35s ease;
+    }
+    .msg.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+      color: var(--user-text);
+      border-bottom-right-radius: 4px;
+    }
+    .msg.bot {
+      align-self: flex-start;
+      background: var(--bot-bubble);
+      border-bottom-left-radius: 4px;
+      transition: background 0.35s ease;
+    }
+    .msg .matched {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .typing { display: flex; gap: 5px; padding: 16px; }
+    .typing span {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--muted);
+      animation: bounce 1s infinite ease-in-out;
+    }
+    .typing span:nth-child(2) { animation-delay: 0.15s; }
+    .typing span:nth-child(3) { animation-delay: 0.3s; }
+
+    .suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0 22px 12px;
+    }
+    .chip {
+      background: var(--chip-bg);
+      color: var(--chip-text);
+      border: none;
+      border-radius: 999px;
+      padding: 7px 13px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: transform 0.35s ease, background 0.35s ease;
+    }
+    .chip:hover { transform: translateY(-2px); }
+
+    form {
+      display: flex;
+      gap: 10px;
+      padding: 14px 18px;
+      border-top: 1px solid var(--border);
+      transition: border-color 0.35s ease;
+    }
+    input {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.35s ease, background 0.35s ease;
+    }
+    input:focus { border-color: var(--accent-1); }
+    button.send {
+      border: none;
+      border-radius: 999px;
+      padding: 0 20px;
+      background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+    button.send:hover { transform: scale(1.04); }
+    button.send:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+    @keyframes pop {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+      40% { transform: translateY(-5px); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat">
+    <header>
+      <div class="avatar">S</div>
+      <div>
+        <h1>Shop Online Help</h1>
+      </div>
+    </header>
+
+    <div id="messages"></div>
+
+    <div class="suggestions" id="suggestions">
+      <button class="chip">How long do refunds take?</button>
+      <button class="chip">Can I cancel my order?</button>
+      <button class="chip">Do you offer free shipping?</button>
+      <button class="chip">My payment was declined</button>
+    </div>
+
+    <form id="chatForm">
+      <input id="input" type="text" maxlength="500" aria-label="Your question" placeholder="Ask about orders, shipping, returns…" autocomplete="off">
+      <button class="send" type="submit">Send</button>
+    </form>
+  </div>
+
+  <script type="module">
+    // Retrieval runs in the browser: the question is embedded with the same bge-small model
+    // used to build faq_index.json, then compared against the pre-computed FAQ embeddings.
+    // Only the matching entry IDs are sent to /api/ask, which asks Groq to write the answer.
+    import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.0';
+
+    const indexPromise = fetch('/faq_index.json').then(r => r.json());
+    let embedderPromise = null;
+    function getEmbedder() {
+      // Downloaded once (~34 MB) and cached by the browser afterwards
+      embedderPromise ??= pipeline('feature-extraction', 'Xenova/bge-small-en-v1.5', { dtype: 'q8' });
+      return embedderPromise;
+    }
+    // Start loading the model straight away so the first question is quicker
+    getEmbedder().catch(() => { embedderPromise = null; });
+
+    async function retrieve(question) {
+      const [index, embed] = await Promise.all([indexPromise, getEmbedder()]);
+      // bge uses CLS pooling + normalisation, matching sentence-transformers
+      const output = await embed(index.query_prefix + question, { pooling: 'cls', normalize: true });
+      const q = output.data;
+      const scored = index.entries.map(e => {
+        let dot = 0;
+        for (let i = 0; i < q.length; i++) dot += q[i] * e.embedding[i];
+        return { entry: e, score: dot };
+      });
+      scored.sort((a, b) => b.score - a.score);
+      return scored.slice(0, index.top_k).filter(s => s.score >= index.min_score);
+    }
+
+    // Used when the LLM is unavailable: show the best FAQ entry without its leading question
+    function verbatim(text) {
+      const [first, ...rest] = text.split('\n');
+      const m = first.match(/^(.*?\?)\s*(.*)$/);
+      return m ? { faq_question: m[1], answer: [m[2], ...rest].filter(Boolean).join('\n') }
+               : { faq_question: '', answer: text };
+    }
+
+    // Chat
+    const messages = document.getElementById('messages');
+    const form = document.getElementById('chatForm');
+    const input = document.getElementById('input');
+    const sendBtn = form.querySelector('.send');
+
+    function addMessage(role, text) {
+      const div = document.createElement('div');
+      div.className = 'msg ' + role;
+      div.textContent = text;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+      return div;
+    }
+
+    function addBotAnswer(data) {
+      const div = document.createElement('div');
+      div.className = 'msg bot';
+      if (data.faq_question) {
+        const q = document.createElement('span');
+        q.className = 'matched';
+        q.textContent = data.faq_question;
+        div.appendChild(q);
+      }
+      div.appendChild(document.createTextNode(data.answer));
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function showTyping() {
+      const div = document.createElement('div');
+      div.className = 'msg bot typing';
+      div.innerHTML = '<span></span><span></span><span></span>';
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+      return div;
+    }
+
+    async function ask(question) {
+      // Suggestions are only a starting point; hide them so the conversation has room
+      document.getElementById('suggestions').style.display = 'none';
+      addMessage('user', question);
+      sendBtn.disabled = true;
+      const typing = showTyping();
+      try {
+        const hits = await retrieve(question);
+        if (!hits.length) {
+          typing.remove();
+          addMessage('bot', "I couldn't find that in our FAQ. Try rephrasing, or contact support@shop_online.com.");
+        } else {
+          let data = {};
+          try {
+            const res = await fetch('/api/ask', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ question, entryIds: hits.map(h => h.entry.id) })
+            });
+            data = await res.json();
+          } catch {
+            data = { error: 'llm_unavailable' };
+          }
+          typing.remove();
+          if (data.answer) {
+            addBotAnswer({ answer: data.answer });
+          } else if (data.error === 'llm_unavailable') {
+            addBotAnswer(verbatim(hits[0].entry.text));
+          } else {
+            addMessage('bot', data.error || 'Sorry, something went wrong. Please try again.');
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        typing.remove();
+        addMessage('bot', "Sorry, I can't connect right now. Please try again in a moment.");
+      }
+      sendBtn.disabled = false;
+      input.focus();
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const q = input.value.trim();
+      if (!q) return;
+      input.value = '';
+      ask(q);
+    });
+
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => ask(chip.textContent));
+    });
+
+    addMessage('bot', "Hi! I'm the Shop Online assistant. Ask me anything about orders, shipping, returns, payments, or your account.");
+  </script>
+</body>
+</html>
