@@ -219,10 +219,16 @@
       // bge uses CLS pooling + normalisation, matching sentence-transformers
       const output = await embed(index.query_prefix + question, { pooling: 'cls', normalize: true });
       const q = output.data;
+      // Each entry has its own embedding plus one per search phrase (e.g. "BNPL");
+      // it scores as well as its best match
       const scored = index.entries.map(e => {
-        let dot = 0;
-        for (let i = 0; i < q.length; i++) dot += q[i] * e.embedding[i];
-        return { entry: e, score: dot };
+        let best = -1;
+        for (const emb of e.embeddings) {
+          let dot = 0;
+          for (let i = 0; i < q.length; i++) dot += q[i] * emb[i];
+          if (dot > best) best = dot;
+        }
+        return { entry: e, score: best };
       });
       scored.sort((a, b) => b.score - a.score);
       return scored.slice(0, index.top_k).filter(s => s.score >= index.min_score);
